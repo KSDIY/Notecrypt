@@ -6,6 +6,11 @@ const bcrypt = require('bcryptjs');
 const app = express();
 
 // Middleware
+const corsOptions = {
+  origin: 'https://notecrypt-1.onrender.com', // Replace with your actual frontend URL
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+};
 
 app.use(cors());
 app.use(express.json());
