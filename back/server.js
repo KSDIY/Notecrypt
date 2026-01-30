@@ -12,7 +12,6 @@ const corsOptions = {
   allowedHeaders: ['Content-Type', 'Authorization'],
 };
 
-app.use(cors());
 app.use(express.json());
 
 // MongoDB Connection
