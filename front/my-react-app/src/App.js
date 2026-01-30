@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './App.css';
 
-const API_URL = 'https://notecrypt-mdkz.onrender.com';
+const API_URL = 'https://notecrypt-mdkz.onrender.com/api';
 
 function App() {
   const [username, setUsername] = useState('');
