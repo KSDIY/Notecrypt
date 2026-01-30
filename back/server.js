@@ -7,7 +7,7 @@ const app = express();
 
 // Middleware
 const corsOptions = {
-  origin: 'https://notecrypt-1.onrender.com', // Replace with your actual frontend URL
+  origin: 'https://notecrypt-front.onrender.com/', // Replace with your actual frontend URL
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 };
