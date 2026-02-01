@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Arimo:wght@400;500;600;700&display=swap');
+
 * {
   margin: 0;
   padding: 0;
@@ -5,8 +7,24 @@
 }
 
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  font-family: 'Arimo', Arial, sans-serif;
+  background: 
+    repeating-linear-gradient(
+      0deg,
+      #e0e0e0 0px,
+      #e0e0e0 1px,
+      transparent 1px,
+      transparent 20px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      #e0e0e0 0px,
+      #e0e0e0 1px,
+      transparent 1px,
+      transparent 20px
+    ),
+    #ffffff;
+  background-size: 20px 20px;
   min-height: 100vh;
 }
 
@@ -18,7 +36,7 @@ body {
 }
 
 .login-box {
-  background: white;
+  background: #FFEB3B;
   padding: 40px;
   border-radius: 12px;
   box-shadow: 0 10px 40px rgba(0,0,0,0.2);
@@ -28,12 +46,14 @@ body {
 }
 
 .login-box h1 {
-  color: #667eea;
+  color: #000000;
   margin-bottom: 10px;
+  font-family: 'Arimo', sans-serif;
+  font-weight: 700;
 }
 
 .login-box p {
-  color: #666;
+  color: #333;
   margin-bottom: 20px;
 }
 
@@ -44,11 +64,12 @@ body {
   border-radius: 6px;
   font-size: 16px;
   margin-bottom: 15px;
+  font-family: 'Arimo', sans-serif;
 }
 
 .login-box input:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: #FFC107;
 }
 
 .login-box button {
@@ -61,10 +82,28 @@ body {
   font-size: 16px;
   cursor: pointer;
   font-weight: bold;
+  font-family: 'Arimo', sans-serif;
 }
 
 .login-box button:hover {
   background: #5568d3;
+}
+
+.switch-mode {
+  margin-top: 15px;
+  color: #333;
+  font-size: 14px;
+}
+
+.switch-mode span {
+  color: #000000;
+  cursor: pointer;
+  font-weight: bold;
+  margin-left: 5px;
+}
+
+.switch-mode span:hover {
+  text-decoration: underline;
 }
 
 .app {
@@ -74,7 +113,7 @@ body {
 }
 
 header {
-  background: white;
+  background: #FFEB3B;
   padding: 20px;
   border-radius: 12px;
   margin-bottom: 20px;
@@ -85,7 +124,9 @@ header {
 }
 
 header h1 {
-  color: #667eea;
+  color: #000000;
+  font-family: 'Arimo', sans-serif;
+  font-weight: 700;
 }
 
 .user-info {
@@ -95,7 +136,7 @@ header h1 {
 }
 
 .user-info span {
-  color: #666;
+  color: #333;
   font-weight: 500;
 }
 
@@ -106,6 +147,7 @@ header h1 {
   border: none;
   border-radius: 6px;
   cursor: pointer;
+  font-family: 'Arimo', sans-serif;
 }
 
 .tabs {
@@ -117,17 +159,19 @@ header h1 {
 .tabs button {
   padding: 12px 24px;
   background: white;
-  border: none;
+  border: 2px solid #ddd;
   border-radius: 8px;
   cursor: pointer;
   font-weight: 500;
   color: #666;
   transition: all 0.3s;
+  font-family: 'Arimo', sans-serif;
 }
 
 .tabs button.active {
-  background: #667eea;
-  color: white;
+  background: #FFEB3B;
+  color: #000;
+  border-color: #FFC107;
 }
 
 .error {
@@ -136,6 +180,7 @@ header h1 {
   padding: 12px;
   border-radius: 6px;
   margin-bottom: 15px;
+  font-family: 'Arimo', sans-serif;
 }
 
 .main-content {
@@ -152,8 +197,10 @@ header h1 {
 }
 
 .note-editor h2, .notes-list h2, .recycle-bin h2 {
-  color: #667eea;
+  color: #000000;
   margin-bottom: 20px;
+  font-family: 'Arimo', sans-serif;
+  font-weight: 700;
 }
 
 .note-editor input {
@@ -163,23 +210,26 @@ header h1 {
   border-radius: 6px;
   font-size: 16px;
   margin-bottom: 15px;
+  font-family: 'Arimo', sans-serif;
 }
 
 .note-editor textarea {
   width: 100%;
   padding: 12px;
-  border: 2px solid #ddd;
+  border: 2px solid #FFC107;
   border-radius: 6px;
   font-size: 16px;
-  font-family: inherit;
+  font-family: 'Arimo', sans-serif;
   resize: vertical;
   margin-bottom: 15px;
+  background: #FFEB3B;
+  color: #000;
 }
 
 .note-editor input:focus,
 .note-editor textarea:focus {
   outline: none;
-  border-color: #667eea;
+  border-color: #FFC107;
 }
 
 .editor-buttons {
@@ -196,6 +246,7 @@ header h1 {
   border-radius: 6px;
   cursor: pointer;
   font-weight: bold;
+  font-family: 'Arimo', sans-serif;
 }
 
 .save-btn:hover {
@@ -209,14 +260,16 @@ header h1 {
   border: none;
   border-radius: 6px;
   cursor: pointer;
+  font-family: 'Arimo', sans-serif;
 }
 
 .note-card {
-  background: #f8f9fa;
+  background: #fff9c4;
   padding: 20px;
   border-radius: 8px;
   margin-bottom: 15px;
-  border-left: 4px solid #667eea;
+  border-left: 4px solid #FFC107;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
 .note-card.deleted {
@@ -225,18 +278,21 @@ header h1 {
 }
 
 .note-card h3 {
-  color: #333;
+  color: #000;
   margin-bottom: 10px;
+  font-family: 'Arimo', sans-serif;
+  font-weight: 700;
 }
 
 .note-card p {
-  color: #666;
+  color: #333;
   margin-bottom: 10px;
   line-height: 1.5;
+  font-family: 'Arimo', sans-serif;
 }
 
 .note-card small {
-  color: #999;
+  color: #666;
   font-size: 12px;
 }
 
@@ -252,6 +308,7 @@ header h1 {
   border-radius: 6px;
   cursor: pointer;
   font-size: 14px;
+  font-family: 'Arimo', sans-serif;
 }
 
 .note-actions button:first-child {
@@ -298,21 +355,4 @@ header h1 {
     flex-direction: column;
     gap: 15px;
   }
-}
-
-.switch-mode {
-  margin-top: 15px;
-  color: #666;
-  font-size: 14px;
-}
-
-.switch-mode span {
-  color: #667eea;
-  cursor: pointer;
-  font-weight: bold;
-  margin-left: 5px;
-}
-
-.switch-mode span:hover {
-  text-decoration: underline;
 }
