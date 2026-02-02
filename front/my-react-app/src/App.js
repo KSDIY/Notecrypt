@@ -13,8 +13,30 @@ function App() {
   const [recycleBin, setRecycleBin] = useState([]);
   const [currentNote, setCurrentNote] = useState({ title: '', content: '' });
   const [editingId, setEditingId] = useState(null);
-  const [activeTab, setActiveTab] = useState('notes');
+  const [activeTab, setActiveTab] = useState('create'); // Changed default to 'create'
+  const [showNotesList, setShowNotesList] = useState(false);
   const [error, setError] = useState('');
+
+  // Keep user logged in after refresh
+  useEffect(() => {
+    const savedUsername = localStorage.getItem('username');
+    if (savedUsername) {
+      setUsername(savedUsername);
+      setIsLoggedIn(true);
+      fetchNotesForUser(savedUsername);
+    }
+  }, []);
+
+  const fetchNotesForUser = async (user) => {
+    try {
+      const res = await axios.get(`${API_URL}/api/notes/${user}`);
+      setNotes(res.data);
+      const recycleRes = await axios.get(`${API_URL}/api/notes/${user}/recycle`);
+      setRecycleBin(recycleRes.data);
+    } catch (err) {
+      console.error('Error fetching notes:', err);
+    }
+  };
 
   const handleLogin = async () => {
     if (!username.trim() || !password.trim()) {
@@ -30,6 +52,7 @@ function App() {
 
       setIsLoggedIn(true);
       setError('');
+      localStorage.setItem('username', username.trim()); // Save to localStorage
       fetchNotes();
       fetchRecycleBin();
     } catch (err) {
@@ -88,6 +111,13 @@ function App() {
       return;
     }
 
+    // Prevent double-save by disabling button
+    const saveButton = document.querySelector('.save-btn');
+    if (saveButton) {
+      saveButton.disabled = true;
+      saveButton.textContent = 'Saving...';
+    }
+
     try {
       if (editingId) {
         await axios.put(`${API_URL}/api/notes/${editingId}`, currentNote);
@@ -97,10 +127,18 @@ function App() {
       setCurrentNote({ title: '', content: '' });
       setEditingId(null);
       setError('');
-      fetchNotes();
+      await fetchNotes();
+      setShowNotesList(true);
+      setActiveTab('notes'); // Switch to notes tab after saving
     } catch (err) {
       console.error('Error saving note:', err);
       setError('Error saving note. Please try again.');
+    } finally {
+      // Re-enable button
+      if (saveButton) {
+        saveButton.disabled = false;
+        saveButton.textContent = editingId ? 'Update Note' : 'Save Note';
+      }
     }
   };
 
@@ -126,20 +164,52 @@ function App() {
     }
   };
 
+  const emptyRecycleBin = async () => {
+    if (!window.confirm('Permanently delete all notes in recycle bin? This cannot be undone!')) {
+      return;
+    }
+
+    try {
+      await Promise.all(
+        recycleBin.map(note =>
+          axios.delete(`${API_URL}/api/notes/${note._id}/permanent`)
+        )
+      );
+      fetchRecycleBin();
+    } catch (err) {
+      console.error('Error emptying recycle bin:', err);
+      setError('Error emptying recycle bin. Please try again.');
+    }
+  };
+
   const editNote = (note) => {
     setCurrentNote({ title: note.title, content: note.content });
     setEditingId(note._id);
+    setActiveTab('create'); // Switch to create tab when editing
+    setShowNotesList(false);
   };
 
   const logout = () => {
     setIsLoggedIn(false);
     setUsername('');
     setPassword('');
+    localStorage.removeItem('username'); // Clear from localStorage
     setNotes([]);
     setRecycleBin([]);
     setCurrentNote({ title: '', content: '' });
     setEditingId(null);
     setIsNewUser(false);
+    setShowNotesList(false);
+    setActiveTab('create');
+  };
+
+  const handleTabClick = (tab) => {
+    setActiveTab(tab);
+    if (tab === 'notes') {
+      setShowNotesList(true);
+    } else if (tab === 'create') {
+      setShowNotesList(false);
+    }
   };
 
   if (!isLoggedIn) {
@@ -203,8 +273,14 @@ function App() {
 
       <div className="tabs">
         <button
+          className={activeTab === 'create' ? 'active' : ''}
+          onClick={() => handleTabClick('create')}
+        >
+          Create Note
+        </button>
+        <button
           className={activeTab === 'notes' ? 'active' : ''}
-          onClick={() => setActiveTab('notes')}
+          onClick={() => handleTabClick('notes')}
         >
           My Notes ({notes.length})
         </button>
@@ -218,7 +294,8 @@ function App() {
 
       {error && <div className="error">{error}</div>}
 
-      {activeTab === 'notes' && (
+      {/* CREATE NOTE TAB - Centered */}
+      {activeTab === 'create' && (
         <div className="main-content">
           <div className="note-editor">
             <h2>{editingId ? 'Edit Note' : 'Create New Note'}</h2>
@@ -232,7 +309,7 @@ function App() {
               placeholder="Write your note here..."
               value={currentNote.content}
               onChange={(e) => setCurrentNote({ ...currentNote, content: e.target.value })}
-              rows="8"
+              rows="10"
             />
             <div className="editor-buttons">
               <button onClick={saveNote} className="save-btn">
@@ -251,44 +328,59 @@ function App() {
               )}
             </div>
           </div>
-
-          <div className="notes-list">
-            <h2>Your Notes</h2>
-            {notes.length === 0 ? (
-              <p className="empty-state">No notes yet. Create your first note above!</p>
-            ) : (
-              notes.map((note) => (
-                <div key={note._id} className="note-card">
-                  <h3>{note.title}</h3>
-                  <p>{note.content}</p>
-                  <small>{new Date(note.createdAt).toLocaleDateString()}</small>
-                  <div className="note-actions">
-                    <button onClick={() => editNote(note)}>✏️ Edit</button>
-                    <button onClick={() => deleteNote(note._id)} className="delete-btn">
-                      🗑️ Delete
-                    </button>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
         </div>
       )}
 
+      {/* MY NOTES TAB - Only shows when clicked */}
+      {activeTab === 'notes' && (
+        <div className="notes-list">
+          <h2>Your Notes</h2>
+          {notes.length === 0 ? (
+            <p className="empty-state">No notes yet. Create your first note!</p>
+          ) : (
+            notes.map((note) => (
+              <div key={note._id} className="note-card">
+                <h3>{note.title}</h3>
+                <p>{note.content}</p>
+                <small>{new Date(note.createdAt).toLocaleDateString()}</small>
+                <div className="note-actions">
+                  <button onClick={() => editNote(note)}>✏️ Edit</button>
+                  <button onClick={() => deleteNote(note._id)} className="delete-btn">
+                    🗑️ Delete
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      )}
+
+      {/* RECYCLE BIN TAB with Empty Bin button */}
       {activeTab === 'recycle' && (
         <div className="recycle-bin">
-          <h2>Recycle Bin</h2>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+            <h2 style={{ margin: 0 }}>Recycle Bin</h2>
+            {recycleBin.length > 0 && (
+              <button
+                onClick={emptyRecycleBin}
+                className="delete-btn"
+                style={{ padding: '8px 16px' }}
+              >
+                🗑️ Empty Bin
+              </button>
+            )}
+          </div>
           <p className="recycle-info">Notes will be permanently deleted after 30 days</p>
           {recycleBin.length === 0 ? (
             <p className="empty-state">Recycle bin is empty</p>
           ) : (
             recycleBin.map((note) => (
               <div key={note._id} className="note-card deleted">
-                <h2>{note.title}</h2>
+                <h3>{note.title}</h3>
                 <p>{note.content}</p>
                 <small>
                   Deleted: {new Date(note.deletedAt).toLocaleDateString()}
-                  (Expires: {new Date(note.expiresAt).toLocaleDateString()})
+                  {' '}(Expires: {new Date(note.expiresAt).toLocaleDateString()})
                 </small>
                 <div className="note-actions">
                   <button onClick={() => restoreNote(note._id)} className="restore-btn">
@@ -305,4 +397,3 @@ function App() {
 }
 
 export default App;
-
