@@ -16,7 +16,13 @@ function App() {
   const [activeTab, setActiveTab] = useState('create'); // Changed default to 'create'
   const [showNotesList, setShowNotesList] = useState(false);
   const [error, setError] = useState('');
-
+const [textFormat, setTextFormat] = useState({
+  fontSize: 16,
+  isBold: false,
+  isItalic: false,
+  isUnderline: false
+});
+  
   // Keep user logged in after refresh
   useEffect(() => {
     const savedUsername = localStorage.getItem('username');
@@ -104,6 +110,30 @@ function App() {
       setError('Error fetching recycle bin. Please try again.');
     }
   };
+
+  const toggleBold = () => {
+  setTextFormat({ ...textFormat, isBold: !textFormat.isBold });
+};
+
+const toggleItalic = () => {
+  setTextFormat({ ...textFormat, isItalic: !textFormat.isItalic });
+};
+
+const toggleUnderline = () => {
+  setTextFormat({ ...textFormat, isUnderline: !textFormat.isUnderline });
+};
+
+const increaseFontSize = () => {
+  if (textFormat.fontSize < 32) {
+    setTextFormat({ ...textFormat, fontSize: textFormat.fontSize + 2 });
+  }
+};
+
+const decreaseFontSize = () => {
+  if (textFormat.fontSize > 12) {
+    setTextFormat({ ...textFormat, fontSize: textFormat.fontSize - 2 });
+  }
+};
 
   const saveNote = async () => {
     if (!currentNote.title.trim() || !currentNote.content.trim()) {
@@ -295,42 +325,97 @@ function App() {
       {error && <div className="error">{error}</div>}
 
       {/* CREATE NOTE TAB - Centered */}
-      {activeTab === 'create' && (
-        <div className="main-content">
-          <div className="note-editor">
-            <h2>{editingId ? 'Edit Note' : 'Create New Note'}</h2>
-            <input
-              type="text"
-              placeholder="Note Title"
-              value={currentNote.title}
-              onChange={(e) => setCurrentNote({ ...currentNote, title: e.target.value })}
-            />
-            <textarea
-              placeholder="Write your note here..."
-              value={currentNote.content}
-              onChange={(e) => setCurrentNote({ ...currentNote, content: e.target.value })}
-              rows="10"
-            />
-            <div className="editor-buttons">
-              <button onClick={saveNote} className="save-btn">
-                {editingId ? 'Update Note' : 'Save Note'}
-              </button>
-              {editingId && (
-                <button
-                  onClick={() => {
-                    setCurrentNote({ title: '', content: '' });
-                    setEditingId(null);
-                  }}
-                  className="cancel-btn"
-                >
-                  Cancel
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
+     <div className="note-editor">
+  <h2>{editingId ? 'Edit Note' : 'Create New Note'}</h2>
+  <input
+    type="text"
+    placeholder="Note Title"
+    value={currentNote.title}
+    onChange={(e) => setCurrentNote({ ...currentNote, title: e.target.value })}
+  />
+  
+  {/* TEXT FORMATTING TOOLBAR */}
+  <div className="formatting-toolbar">
+    <button
+      type="button"
+      onClick={decreaseFontSize}
+      className="format-btn"
+      title="Decrease font size"
+    >
+      A-
+    </button>
+    
+    <span className="font-size-display">{textFormat.fontSize}px</span>
+    
+    <button
+      type="button"
+      onClick={increaseFontSize}
+      className="format-btn"
+      title="Increase font size"
+    >
+      A+
+    </button>
+    
+    <div className="toolbar-divider"></div>
+    
+    <button
+      type="button"
+      onClick={toggleBold}
+      className={`format-btn ${textFormat.isBold ? 'active' : ''}`}
+      title="Bold"
+    >
+      <strong>B</strong>
+    </button>
+    
+    <button
+      type="button"
+      onClick={toggleItalic}
+      className={`format-btn ${textFormat.isItalic ? 'active' : ''}`}
+      title="Italic"
+    >
+      <em>I</em>
+    </button>
+    
+    <button
+      type="button"
+      onClick={toggleUnderline}
+      className={`format-btn ${textFormat.isUnderline ? 'active' : ''}`}
+      title="Underline"
+    >
+      <u>U</u>
+    </button>
+  </div>
+  
+  <textarea
+    placeholder="Write your note here..."
+    value={currentNote.content}
+    onChange={(e) => setCurrentNote({ ...currentNote, content: e.target.value })}
+    rows="10"
+    style={{
+      fontSize: `${textFormat.fontSize}px`,
+      fontWeight: textFormat.isBold ? 'bold' : 'normal',
+      fontStyle: textFormat.isItalic ? 'italic' : 'normal',
+      textDecoration: textFormat.isUnderline ? 'underline' : 'none'
+    }}
+  />
+  
+  <div className="editor-buttons">
+    <button onClick={saveNote} className="save-btn">
+      {editingId ? 'Update Note' : 'Save Note'}
+    </button>
+    {editingId && (
+      <button
+        onClick={() => {
+          setCurrentNote({ title: '', content: '' });
+          setEditingId(null);
+        }}
+        className="cancel-btn"
+      >
+        Cancel
+      </button>
+    )}
+  </div>
+</div>
       {/* MY NOTES TAB - Only shows when clicked */}
       {activeTab === 'notes' && (
         <div className="notes-list">
