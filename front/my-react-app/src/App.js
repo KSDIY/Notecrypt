@@ -5,25 +5,38 @@ import './App.css';
 const API_URL = 'https://notecrypt-mdkz.onrender.com';
 
 function App() {
+  // ============================================
+  // STATE DECLARATIONS
+  // ============================================
+  // Stores user credentials and login status
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isNewUser, setIsNewUser] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  
+  // Stores notes data
   const [notes, setNotes] = useState([]);
   const [recycleBin, setRecycleBin] = useState([]);
   const [currentNote, setCurrentNote] = useState({ title: '', content: '' });
   const [editingId, setEditingId] = useState(null);
-  const [activeTab, setActiveTab] = useState('create'); // Changed default to 'create'
+  
+  // UI control states
+  const [activeTab, setActiveTab] = useState('create'); // Which tab is currently active
   const [showNotesList, setShowNotesList] = useState(false);
   const [error, setError] = useState('');
-const [textFormat, setTextFormat] = useState({
-  fontSize: 16,
-  isBold: false,
-  isItalic: false,
-  isUnderline: false
-});
   
-  // Keep user logged in after refresh
+  // Text formatting states
+  const [textFormat, setTextFormat] = useState({
+    fontSize: 16,
+    isBold: false,
+    isItalic: false,
+    isUnderline: false
+  });
+
+  // ============================================
+  // FUNCTION: AUTO-LOGIN ON PAGE REFRESH
+  // Purpose: Keep user logged in when they refresh the page
+  // ============================================
   useEffect(() => {
     const savedUsername = localStorage.getItem('username');
     if (savedUsername) {
@@ -33,6 +46,10 @@ const [textFormat, setTextFormat] = useState({
     }
   }, []);
 
+  // ============================================
+  // FUNCTION: FETCH NOTES FOR SPECIFIC USER
+  // Purpose: Load all notes and recycle bin items for a user
+  // ============================================
   const fetchNotesForUser = async (user) => {
     try {
       const res = await axios.get(`${API_URL}/api/notes/${user}`);
@@ -44,6 +61,10 @@ const [textFormat, setTextFormat] = useState({
     }
   };
 
+  // ============================================
+  // FUNCTION: HANDLE USER LOGIN
+  // Purpose: Authenticate user and load their data
+  // ============================================
   const handleLogin = async () => {
     if (!username.trim() || !password.trim()) {
       setError('Username and password are required');
@@ -58,7 +79,7 @@ const [textFormat, setTextFormat] = useState({
 
       setIsLoggedIn(true);
       setError('');
-      localStorage.setItem('username', username.trim()); // Save to localStorage
+      localStorage.setItem('username', username.trim()); // Save username to browser
       fetchNotes();
       fetchRecycleBin();
     } catch (err) {
@@ -66,6 +87,10 @@ const [textFormat, setTextFormat] = useState({
     }
   };
 
+  // ============================================
+  // FUNCTION: HANDLE USER REGISTRATION
+  // Purpose: Create new user account
+  // ============================================
   const handleRegister = async () => {
     if (!username.trim() || !password.trim()) {
       setError('Username and password are required');
@@ -91,6 +116,10 @@ const [textFormat, setTextFormat] = useState({
     }
   };
 
+  // ============================================
+  // FUNCTION: FETCH NOTES
+  // Purpose: Get all active notes for logged-in user
+  // ============================================
   const fetchNotes = async () => {
     try {
       const res = await axios.get(`${API_URL}/api/notes/${username}`);
@@ -101,6 +130,10 @@ const [textFormat, setTextFormat] = useState({
     }
   };
 
+  // ============================================
+  // FUNCTION: FETCH RECYCLE BIN
+  // Purpose: Get all deleted notes for logged-in user
+  // ============================================
   const fetchRecycleBin = async () => {
     try {
       const res = await axios.get(`${API_URL}/api/notes/${username}/recycle`);
@@ -111,30 +144,55 @@ const [textFormat, setTextFormat] = useState({
     }
   };
 
+  // ============================================
+  // FUNCTION: TOGGLE BOLD FORMATTING
+  // Purpose: Turn bold on/off in textarea
+  // ============================================
   const toggleBold = () => {
-  setTextFormat({ ...textFormat, isBold: !textFormat.isBold });
-};
+    setTextFormat({ ...textFormat, isBold: !textFormat.isBold });
+  };
 
-const toggleItalic = () => {
-  setTextFormat({ ...textFormat, isItalic: !textFormat.isItalic });
-};
+  // ============================================
+  // FUNCTION: TOGGLE ITALIC FORMATTING
+  // Purpose: Turn italic on/off in textarea
+  // ============================================
+  const toggleItalic = () => {
+    setTextFormat({ ...textFormat, isItalic: !textFormat.isItalic });
+  };
 
-const toggleUnderline = () => {
-  setTextFormat({ ...textFormat, isUnderline: !textFormat.isUnderline });
-};
+  // ============================================
+  // FUNCTION: TOGGLE UNDERLINE FORMATTING
+  // Purpose: Turn underline on/off in textarea
+  // ============================================
+  const toggleUnderline = () => {
+    setTextFormat({ ...textFormat, isUnderline: !textFormat.isUnderline });
+  };
 
-const increaseFontSize = () => {
-  if (textFormat.fontSize < 32) {
-    setTextFormat({ ...textFormat, fontSize: textFormat.fontSize + 2 });
-  }
-};
+  // ============================================
+  // FUNCTION: INCREASE FONT SIZE
+  // Purpose: Make text bigger (max 32px)
+  // ============================================
+  const increaseFontSize = () => {
+    if (textFormat.fontSize < 32) {
+      setTextFormat({ ...textFormat, fontSize: textFormat.fontSize + 2 });
+    }
+  };
 
-const decreaseFontSize = () => {
-  if (textFormat.fontSize > 12) {
-    setTextFormat({ ...textFormat, fontSize: textFormat.fontSize - 2 });
-  }
-};
+  // ============================================
+  // FUNCTION: DECREASE FONT SIZE
+  // Purpose: Make text smaller (min 12px)
+  // ============================================
+  const decreaseFontSize = () => {
+    if (textFormat.fontSize > 12) {
+      setTextFormat({ ...textFormat, fontSize: textFormat.fontSize - 2 });
+    }
+  };
 
+  // ============================================
+  // FUNCTION: SAVE NOTE
+  // Purpose: Create new note or update existing one
+  // Prevents double-save by disabling button while saving
+  // ============================================
   const saveNote = async () => {
     if (!currentNote.title.trim() || !currentNote.content.trim()) {
       setError('Title and content are required');
@@ -150,8 +208,10 @@ const decreaseFontSize = () => {
 
     try {
       if (editingId) {
+        // Update existing note
         await axios.put(`${API_URL}/api/notes/${editingId}`, currentNote);
       } else {
+        // Create new note
         await axios.post(`${API_URL}/api/notes`, { ...currentNote, username });
       }
       setCurrentNote({ title: '', content: '' });
@@ -172,6 +232,10 @@ const decreaseFontSize = () => {
     }
   };
 
+  // ============================================
+  // FUNCTION: DELETE NOTE
+  // Purpose: Move note to recycle bin (soft delete)
+  // ============================================
   const deleteNote = async (id) => {
     try {
       await axios.delete(`${API_URL}/api/notes/${id}`);
@@ -183,6 +247,10 @@ const decreaseFontSize = () => {
     }
   };
 
+  // ============================================
+  // FUNCTION: RESTORE NOTE
+  // Purpose: Bring note back from recycle bin
+  // ============================================
   const restoreNote = async (id) => {
     try {
       await axios.put(`${API_URL}/api/notes/${id}/restore`);
@@ -194,6 +262,10 @@ const decreaseFontSize = () => {
     }
   };
 
+  // ============================================
+  // FUNCTION: EMPTY RECYCLE BIN
+  // Purpose: Permanently delete all notes in recycle bin
+  // ============================================
   const emptyRecycleBin = async () => {
     if (!window.confirm('Permanently delete all notes in recycle bin? This cannot be undone!')) {
       return;
@@ -212,6 +284,10 @@ const decreaseFontSize = () => {
     }
   };
 
+  // ============================================
+  // FUNCTION: EDIT NOTE
+  // Purpose: Load note into editor for editing
+  // ============================================
   const editNote = (note) => {
     setCurrentNote({ title: note.title, content: note.content });
     setEditingId(note._id);
@@ -219,11 +295,15 @@ const decreaseFontSize = () => {
     setShowNotesList(false);
   };
 
+  // ============================================
+  // FUNCTION: LOGOUT
+  // Purpose: Clear all user data and return to login screen
+  // ============================================
   const logout = () => {
     setIsLoggedIn(false);
     setUsername('');
     setPassword('');
-    localStorage.removeItem('username'); // Clear from localStorage
+    localStorage.removeItem('username'); // Clear saved username
     setNotes([]);
     setRecycleBin([]);
     setCurrentNote({ title: '', content: '' });
@@ -233,6 +313,10 @@ const decreaseFontSize = () => {
     setActiveTab('create');
   };
 
+  // ============================================
+  // FUNCTION: HANDLE TAB CLICK
+  // Purpose: Switch between Create Note, My Notes, and Recycle Bin tabs
+  // ============================================
   const handleTabClick = (tab) => {
     setActiveTab(tab);
     if (tab === 'notes') {
@@ -242,6 +326,10 @@ const decreaseFontSize = () => {
     }
   };
 
+  // ============================================
+  // RENDER: LOGIN SCREEN
+  // Shows when user is not logged in
+  // ============================================
   if (!isLoggedIn) {
     return (
       <div className="login-container">
@@ -291,8 +379,16 @@ const decreaseFontSize = () => {
     );
   }
 
+  // ============================================
+  // RENDER: MAIN APPLICATION
+  // Shows after user logs in
+  // ============================================
   return (
     <div className="app">
+      {/* ============================================
+          SECTION: HEADER
+          Shows app name, username, and logout button
+          ============================================ */}
       <header>
         <h1>Notecrypt</h1>
         <div className="user-info">
@@ -301,6 +397,10 @@ const decreaseFontSize = () => {
         </div>
       </header>
 
+      {/* ============================================
+          SECTION: TABS
+          Buttons to switch between Create Note, My Notes, and Recycle Bin
+          ============================================ */}
       <div className="tabs">
         <button
           className={activeTab === 'create' ? 'active' : ''}
@@ -322,101 +422,126 @@ const decreaseFontSize = () => {
         </button>
       </div>
 
+      {/* ============================================
+          SECTION: ERROR DISPLAY
+          Shows error messages if something goes wrong
+          ============================================ */}
       {error && <div className="error">{error}</div>}
 
-      {/* CREATE NOTE TAB - Centered */}
-     <div className="note-editor">
-  <h2>{editingId ? 'Edit Note' : 'Create New Note'}</h2>
-  <input
-    type="text"
-    placeholder="Note Title"
-    value={currentNote.title}
-    onChange={(e) => setCurrentNote({ ...currentNote, title: e.target.value })}
-  />
-  
-  {/* TEXT FORMATTING TOOLBAR */}
-  <div className="formatting-toolbar">
-    <button
-      type="button"
-      onClick={decreaseFontSize}
-      className="format-btn"
-      title="Decrease font size"
-    >
-      A-
-    </button>
-    
-    <span className="font-size-display">{textFormat.fontSize}px</span>
-    
-    <button
-      type="button"
-      onClick={increaseFontSize}
-      className="format-btn"
-      title="Increase font size"
-    >
-      A+
-    </button>
-    
-    <div className="toolbar-divider"></div>
-    
-    <button
-      type="button"
-      onClick={toggleBold}
-      className={`format-btn ${textFormat.isBold ? 'active' : ''}`}
-      title="Bold"
-    >
-      <strong>B</strong>
-    </button>
-    
-    <button
-      type="button"
-      onClick={toggleItalic}
-      className={`format-btn ${textFormat.isItalic ? 'active' : ''}`}
-      title="Italic"
-    >
-      <em>I</em>
-    </button>
-    
-    <button
-      type="button"
-      onClick={toggleUnderline}
-      className={`format-btn ${textFormat.isUnderline ? 'active' : ''}`}
-      title="Underline"
-    >
-      <u>U</u>
-    </button>
-  </div>
-  
-  <textarea
-    placeholder="Write your note here..."
-    value={currentNote.content}
-    onChange={(e) => setCurrentNote({ ...currentNote, content: e.target.value })}
-    rows="10"
-    style={{
-      fontSize: `${textFormat.fontSize}px`,
-      fontWeight: textFormat.isBold ? 'bold' : 'normal',
-      fontStyle: textFormat.isItalic ? 'italic' : 'normal',
-      textDecoration: textFormat.isUnderline ? 'underline' : 'none'
-    }}
-  />
-  
-  <div className="editor-buttons">
-    <button onClick={saveNote} className="save-btn">
-      {editingId ? 'Update Note' : 'Save Note'}
-    </button>
-    {editingId && (
-      <button
-        onClick={() => {
-          setCurrentNote({ title: '', content: '' });
-          setEditingId(null);
-        }}
-        className="cancel-btn"
-      >
-        Cancel
-      </button>
-    )}
-  </div>
-</div>
-      {/* MY NOTES TAB - Only shows when clicked */}
+      {/* ============================================
+          SECTION: CREATE NOTE TAB (CENTERED)
+          Only shows when 'Create Note' tab is active
+          Contains: Title input, formatting toolbar, textarea, save button
+          ============================================ */}
+      {activeTab === 'create' && (
+        <div className="main-content">
+          <div className="note-editor">
+            <h2>{editingId ? 'Edit Note' : 'Create New Note'}</h2>
+            
+            {/* Note Title Input */}
+            <input
+              type="text"
+              placeholder="Note Title"
+              value={currentNote.title}
+              onChange={(e) => setCurrentNote({ ...currentNote, title: e.target.value })}
+            />
+
+            {/* Text Formatting Toolbar */}
+            <div className="formatting-toolbar">
+              {/* Font Size Controls */}
+              <button
+                type="button"
+                onClick={decreaseFontSize}
+                className="format-btn"
+                title="Decrease font size"
+              >
+                A-
+              </button>
+
+              <span className="font-size-display">{textFormat.fontSize}px</span>
+
+              <button
+                type="button"
+                onClick={increaseFontSize}
+                className="format-btn"
+                title="Increase font size"
+              >
+                A+
+              </button>
+
+              <div className="toolbar-divider"></div>
+
+              {/* Bold Button */}
+              <button
+                type="button"
+                onClick={toggleBold}
+                className={`format-btn ${textFormat.isBold ? 'active' : ''}`}
+                title="Bold"
+              >
+                <strong>B</strong>
+              </button>
+
+              {/* Italic Button */}
+              <button
+                type="button"
+                onClick={toggleItalic}
+                className={`format-btn ${textFormat.isItalic ? 'active' : ''}`}
+                title="Italic"
+              >
+                <em>I</em>
+              </button>
+
+              {/* Underline Button */}
+              <button
+                type="button"
+                onClick={toggleUnderline}
+                className={`format-btn ${textFormat.isUnderline ? 'active' : ''}`}
+                title="Underline"
+              >
+                <u>U</u>
+              </button>
+            </div>
+
+            {/* Note Content Textarea */}
+            <textarea
+              placeholder="Write your note here..."
+              value={currentNote.content}
+              onChange={(e) => setCurrentNote({ ...currentNote, content: e.target.value })}
+              rows="10"
+              style={{
+                fontSize: `${textFormat.fontSize}px`,
+                fontWeight: textFormat.isBold ? 'bold' : 'normal',
+                fontStyle: textFormat.isItalic ? 'italic' : 'normal',
+                textDecoration: textFormat.isUnderline ? 'underline' : 'none'
+              }}
+            />
+
+            {/* Save and Cancel Buttons */}
+            <div className="editor-buttons">
+              <button onClick={saveNote} className="save-btn">
+                {editingId ? 'Update Note' : 'Save Note'}
+              </button>
+              {editingId && (
+                <button
+                  onClick={() => {
+                    setCurrentNote({ title: '', content: '' });
+                    setEditingId(null);
+                  }}
+                  className="cancel-btn"
+                >
+                  Cancel
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ============================================
+          SECTION: MY NOTES TAB
+          Only shows when 'My Notes' tab is active
+          Displays all saved notes with edit/delete buttons
+          ============================================ */}
       {activeTab === 'notes' && (
         <div className="notes-list">
           <h2>Your Notes</h2>
@@ -440,9 +565,14 @@ const decreaseFontSize = () => {
         </div>
       )}
 
-      {/* RECYCLE BIN TAB with Empty Bin button */}
+      {/* ============================================
+          SECTION: RECYCLE BIN TAB
+          Only shows when 'Recycle Bin' tab is active
+          Shows deleted notes with restore button and empty bin option
+          ============================================ */}
       {activeTab === 'recycle' && (
         <div className="recycle-bin">
+          {/* Header with Empty Bin button */}
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
             <h2 style={{ margin: 0 }}>Recycle Bin</h2>
             {recycleBin.length > 0 && (
@@ -455,7 +585,9 @@ const decreaseFontSize = () => {
               </button>
             )}
           </div>
+          
           <p className="recycle-info">Notes will be permanently deleted after 30 days</p>
+          
           {recycleBin.length === 0 ? (
             <p className="empty-state">Recycle bin is empty</p>
           ) : (
