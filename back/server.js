@@ -225,6 +225,21 @@ app.put('/api/notes/:id/restore', async (req, res) => {
   }
 });
 
+// Permanently delete note
+app.delete('/api/notes/:id/permanent', async (req, res) => {
+  try {
+    const note = await Note.findByIdAndDelete(req.params.id);
+    
+    if (!note) {
+      return res.status(404).json({ message: 'Note not found' });
+    }
+    
+    res.json({ message: 'Note permanently deleted' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error deleting note', error: error.message });
+  }
+});
+
 // Health check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'Server is running', timestamp: new Date() });
